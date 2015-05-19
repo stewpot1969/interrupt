@@ -9,10 +9,11 @@ void SystemInit()
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/cm3/systick.h>
 
-uint32_t  ctr_a=0;
-uint32_t  ctr_b=0;
-uint32_t  ctr_c=0;
-uint32_t  ctr_d=0;
+uint32_t  ctr[4]={0,0,0,0};
+uint32_t  interval[4]={2203,971,503,4969};
+uint32_t  port[4]={GPIOB,GPIOB,GPIOB,GPIOB};
+uint16_t  portbit[4]={GPIO12,GPIO13,GPIO14,GPIO15};
+int       systick_i;
 
 /// Note: USB serial doodah for GPS:
 //  BLK = GND
@@ -62,28 +63,12 @@ void timer_setup(void) {
 
 void SysTick_Handler(void) {
 
-  ctr_a++;
-  ctr_b++;
-  ctr_c++;
-  ctr_d++;
-
-  if (ctr_a==2203) {
-    gpio_toggle(GPIOB,GPIO12);
-    ctr_a=0;
+  for ( systick_i=0 ; systick_i<4 ; systick_i++ ) {
+    if (ctr[systick_i]++ == interval[systick_i]) {
+      ctr[systick_i]=0;
+      gpio_toggle(port[systick_i],portbit[systick_i]);
+    }
   }
-  if (ctr_b==971) {
-    gpio_toggle(GPIOB,GPIO13);
-    ctr_b=0;
-  }
-  if (ctr_c==503) {
-    gpio_toggle(GPIOB,GPIO14);
-    ctr_c=0;
-  }
-  if (ctr_d==4969) {
-    gpio_toggle(GPIOB,GPIO15);
-    ctr_d=0;
-  }
-    
 }
     
 void main() {
